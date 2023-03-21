@@ -1,0 +1,32 @@
+{
+  "bindings": [
+    {
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 0 9,18 * * *",
+      "runOnStartup": false
+    },
+    {
+      "name": "inputJson",
+      "type": "blob",
+      "dataType": "binary",
+      "connection": "AzureWebJobsStorage",
+      "path": "housing-data/rightmove.json",
+      "direction": "in"
+    },
+    {
+      "name": "outputJson",
+      "type": "blob",
+      "connection": "AzureWebJobsStorage",
+      "path": "housing-data/rightmove.json",
+      "direction": "out"
+    }
+  ],
+  "retry": {
+    "strategy": "fixedDelay",
+    "maxRetryCount": 6,
+    "delayInterval": "00:05:00"
+  },
+  "scriptFile": "../dist/DailyHousingScrape/index.js"
+}
