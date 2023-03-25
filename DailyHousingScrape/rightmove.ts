@@ -10,7 +10,7 @@ export const scrapeRightMove = async (context: Context) => {
     timeout: 0,
   });
   const page = await browser.newPage();
-  context.log("Launched puppeteer");
+  context.log("Launched puppeteer for Rightmove");
   await page.setUserAgent(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36"
   );
@@ -100,7 +100,9 @@ export const scrapeRightMove = async (context: Context) => {
           .toArray()
       );
     });
-    context.log(`Page ${i} scraped, ${thisPage.length} properties scraped`);
+    context.log(
+      `Rightmove: page ${i} scraped, ${thisPage.length} properties scraped`
+    );
 
     // Add all entries from the page into object
     // using a composite key of address, agent, pricePerMonth and bedrooms

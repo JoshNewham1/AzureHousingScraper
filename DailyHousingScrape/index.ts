@@ -1,6 +1,7 @@
 import { AzureFunction, Context } from "@azure/functions";
 import { detailedDiff } from "deep-object-diff";
 import { createTransport } from "nodemailer";
+import { scrapeGumtree } from "./gumtree";
 import { scrapeRightMove } from "./rightmove";
 import { buildEmailHtml } from "./utils";
 
@@ -14,7 +15,9 @@ const timerTrigger: AzureFunction = async function (
     );
 
     // Open Puppeteer and scrape
-    const properties = await scrapeRightMove(context);
+    const rightmoveProperties = await scrapeRightMove(context);
+    const gumtreeProperties = await scrapeGumtree(context);
+    const properties = { ...rightmoveProperties, ...gumtreeProperties };
     const propertiesDiff = detailedDiff(oldProperties, properties);
     context.log(
       `Object diff:\n
