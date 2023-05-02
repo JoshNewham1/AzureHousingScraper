@@ -3,8 +3,7 @@ import * as puppeteer from "puppeteer";
 import { delay } from "./utils";
 
 export const scrapeRightMove = async (context: Context) => {
-  const startingUrl =
-    "https://www.rightmove.co.uk/property-to-rent/find.html?locationIdentifier=REGION%5E475&minBedrooms=3&radius=3.0&sortType=1&propertyTypes=&includeLetAgreed=false&mustHave=student&dontShow=&furnishTypes=&keywords=";
+  const startingUrl = process.env["RIGHTMOVE_LINK"];
   const browser = await puppeteer.launch({
     headless: true,
     timeout: 0,

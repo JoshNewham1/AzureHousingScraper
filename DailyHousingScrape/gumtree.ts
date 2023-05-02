@@ -24,8 +24,7 @@ const autoScroll = async (page) => {
 };
 
 export const scrapeGumtree = async (context: Context) => {
-  const startingUrl =
-    "https://www.gumtree.com/search?featured_filter=false&q=&min_property_number_beds=3&search_category=property-to-rent&urgent_filter=false&sort=date&max_property_number_beds=5&search_distance=3&search_scope=false&photos_filter=false&search_location=EH11JT&distance=3";
+  const startingUrl = process.env["GUMTREE_LINK"];
   const browser = await puppeteer.launch({
     headless: true,
     timeout: 0,

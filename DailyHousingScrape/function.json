@@ -12,14 +12,14 @@
       "type": "blob",
       "dataType": "binary",
       "connection": "AzureWebJobsStorage",
-      "path": "housing-data/rightmove.json",
+      "path": "housing-data/housing.json",
       "direction": "in"
     },
     {
       "name": "outputJson",
       "type": "blob",
       "connection": "AzureWebJobsStorage",
-      "path": "housing-data/rightmove.json",
+      "path": "housing-data/housing.json",
       "direction": "out"
     }
   ],

@@ -44,7 +44,7 @@ const timerTrigger: AzureFunction = async function (
       secure: true,
       port: 465,
       auth: {
-        user: "joshnewham456@gmail.com",
+        user: process.env["SENDER_EMAIL"],
         pass: process.env["GOOGLE_APP_PASSWORD"],
       },
     });
@@ -68,8 +68,8 @@ const timerTrigger: AzureFunction = async function (
     await new Promise<void>((res, rej) =>
       emailer.sendMail(
         {
-          from: "joshnewham456@gmail.com",
-          to: "joshnewham@live.com",
+          from: process.env["SENDER_EMAIL"],
+          to: process.env["RECIPIENT_EMAIL"],
           subject: `Flat Search - ${numProperties} new properties`,
           html: emailHtml,
         },
