@@ -9,6 +9,7 @@ const timerTrigger: AzureFunction = async function (
   context: Context,
   myTimer: any
 ): Promise<void> {
+  // When the timer is triggered (daily)
   try {
     const oldProperties = JSON.parse(
       context.bindings.inputJson.toString("utf8")
@@ -24,7 +25,7 @@ const timerTrigger: AzureFunction = async function (
       ${JSON.stringify(propertiesDiff)}`
     );
 
-    // Write file to Azure Blob Storage
+    // Write file with all properties to Azure Blob Storage
     context.bindings.outputJson = JSON.stringify(properties);
     context.log("Written JSON file to Blob Storage successfully");
 
@@ -38,7 +39,7 @@ const timerTrigger: AzureFunction = async function (
       return;
     }
 
-    const transporter = createTransport({
+    const emailer = createTransport({
       host: "smtp.gmail.com",
       secure: true,
       port: 465,
@@ -65,7 +66,7 @@ const timerTrigger: AzureFunction = async function (
     }
 
     await new Promise<void>((res, rej) =>
-      transporter.sendMail(
+      emailer.sendMail(
         {
           from: "joshnewham456@gmail.com",
           to: "joshnewham@live.com",

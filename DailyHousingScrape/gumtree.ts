@@ -2,6 +2,8 @@ import { Context } from "@azure/functions";
 import * as puppeteer from "puppeteer";
 import { delay } from "./utils";
 
+// Scroll down the page by the height of the window until we reach the bottom
+// Delay by 100ms to give content time to start loading
 const autoScroll = async (page) => {
   await page.evaluate(async () => {
     await new Promise((resolve) => {
@@ -42,6 +44,7 @@ export const scrapeGumtree = async (context: Context) => {
   // Scroll to the bottom of the page to load pagination
   await autoScroll(page);
   await delay(1000);
+  // Get the number of pages in the pagination element at the bottom
   const numPages = await page.evaluate(() => {
     const pageNumbers = document.querySelectorAll(".pagination-page");
     const lastPageNumber = pageNumbers[pageNumbers.length - 1] as HTMLLIElement;
@@ -50,9 +53,11 @@ export const scrapeGumtree = async (context: Context) => {
   context.log(`${numPages} pages found on Gumtree website`);
   let properties = {};
   for (let i = 1; i <= numPages; i++) {
+    // Add jQuery to the page so we can use it to more easily scrape elements
     await page.addScriptTag({
       url: "https://code.jquery.com/jquery-3.3.1.slim.min.js",
     });
+    // Create an object with all the properties on the current page and their attributes
     const thisPage = await page.evaluate(() =>
       $("article.listing-maxi")
         .map(function () {
@@ -61,19 +66,24 @@ export const scrapeGumtree = async (context: Context) => {
           if (address.includes("|")) {
             address = address.split("|")[1];
           }
-          return {
-            address,
-            type: $(this)
+
+          const type =
+            // Whether it's a house or a flat
+            $(this)
               .find('span:contains("Property type")')
               .first()
               .parent()
               .children()
               .last()
-              .text(),
-            link:
-              "https://www.gumtree.com" +
-              $(this).find(".listing-link").attr("href"),
-            bedrooms: parseInt(
+              .text();
+
+          const link =
+            "https://www.gumtree.com" +
+            $(this).find(".listing-link").attr("href");
+
+          const bedrooms =
+            // Find number of bedrooms text and strip any non numbers
+            parseInt(
               $(this)
                 .find('span:contains("Number of bedrooms")')
                 .first()
@@ -82,54 +92,43 @@ export const scrapeGumtree = async (context: Context) => {
                 .last()
                 .text()
                 .match(/\d+/)[0]
-            ),
+            );
+
+          const pricePerMonth =
             // Get price value, strip any text and convert to integer
-            pricePerMonth: parseInt(
+            parseInt(
               $(this)
                 .find(".listing-price > strong")
                 .first()
                 .text()
                 .match(/\d+/g)
                 .join("")
-            ),
-            pricePerMonthPerPerson: (
-              parseInt(
-                $(this)
-                  .find(".listing-price > strong")
-                  .first()
-                  .text()
-                  .match(/\d+/g)
-                  .join("")
-              ) /
-              parseInt(
-                $(this)
-                  .find('span:contains("Number of bedrooms")')
-                  .first()
-                  .parent()
-                  .children()
-                  .last()
-                  .text()
-                  .match(/\d+/)[0]
-              )
-            ).toFixed(2),
-            pricePerWeek:
-              parseInt(
-                $(this)
-                  .find(".listing-price > strong")
-                  .first()
-                  .text()
-                  .match(/\d+/g)
-                  .join("")
-              ) / 4,
-            image: $(this).find(".listing-thumbnail > img").attr("src"),
-            availableDate: $(this)
+            );
+
+          const image = $(this).find(".listing-thumbnail > img").attr("src");
+
+          const availableDate =
+            // Date available text with "Date available: " stripped
+            $(this)
               .find('span:contains("Date available")')
               .first()
               .parent()
               .children()
               .last()
               .text()
-              .replace("Date available: ", ""),
+              .replace("Date available: ", "");
+
+          return {
+            address,
+            type,
+            link,
+            bedrooms,
+            // Get price value, strip any text and convert to integer
+            pricePerMonth,
+            pricePerMonthPerPerson: (pricePerMonth / bedrooms).toFixed(2),
+            pricePerWeek: (pricePerMonth / 4).toFixed(2),
+            image,
+            availableDate,
             furnished: "Furnished", // Gumtree has no field for this so just assume it is
             agent: "Gumtree",
           };

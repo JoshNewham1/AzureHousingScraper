@@ -16,9 +16,12 @@ export const scrapeRightMove = async (context: Context) => {
   );
   await page.goto(startingUrl);
   await page.waitForSelector(".propertyCard-wrapper");
+  // Add jQuery to the page so we can use it for selectors
+  // Note: this only needs to be done once for Rightmove as it uses AJAX and doesn't load any new pages
   await page.addScriptTag({
     url: "https://code.jquery.com/jquery-3.3.1.slim.min.js",
   });
+  // Get the number of pages in the pagination element at the bottom
   const numPages = await page.evaluate(() =>
     parseInt(
       document.querySelector("div.pagination-pageSelect > span:nth-child(4)")
@@ -32,69 +35,84 @@ export const scrapeRightMove = async (context: Context) => {
       return Promise.all(
         $(".propertyCard-wrapper")
           .map(async function () {
+            // Scrape all the content from HTML elements on the page
             const link =
               "https://www.rightmove.co.uk" +
               $(this).find(".propertyCard-link").attr("href");
+
+            // "Click into" the property to get more metadata
             const metadata = await fetch(link).then((res) => res.text());
-            return {
-              address: $(this).find(".propertyCard-address").text().trim(),
-              type: $(this)
+
+            const address = $(this).find(".propertyCard-address").text().trim();
+
+            const type =
+              // Property type (flat or house)
+              $(this)
                 .find(".propertyCard-details > a > div > span:nth-child(1)")
                 .text()
-                .trim(),
-              link,
-              bedrooms: parseInt(
-                $(this)
-                  .find(".propertyCard-details > a > div > span:nth-child(3)")
-                  .text()
-              ),
+                .trim();
+
+            const bedrooms = parseInt(
+              $(this)
+                .find(".propertyCard-details > a > div > span:nth-child(3)")
+                .text()
+            );
+
+            const pricePerMonth =
               // Get price value, strip any text and convert to integer
-              pricePerMonth: parseInt(
+              parseInt(
                 $(this)
                   .find(".propertyCard-priceValue")
                   .text()
                   .trim()
                   .match(/\d+/g)
                   .join("")
-              ),
-              pricePerMonthPerPerson: (
-                parseInt(
-                  $(this)
-                    .find(".propertyCard-priceValue")
-                    .text()
-                    .trim()
-                    .match(/\d+/g)
-                    .join("")
-                ) /
-                parseInt(
-                  $(this)
-                    .find(".propertyCard-details > a > div > span:nth-child(3)")
-                    .text()
-                )
-              ).toFixed(2),
-              pricePerWeek: parseInt(
-                $(this)
-                  .find(".propertyCard-secondaryPriceValue")
-                  .text()
-                  .trim()
-                  .match(/\d+/g)[0]
-              ),
-              image: $(this).find(".propertyCard-img > img").attr("src"),
-              availableDate: $(metadata)
+              );
+
+            const pricePerWeek = parseInt(
+              $(this)
+                .find(".propertyCard-secondaryPriceValue")
+                .text()
+                .trim()
+                .match(/\d+/g)[0]
+            );
+
+            const image = $(this).find(".propertyCard-img > img").attr("src");
+
+            const availableDate =
+              // Use a nasty selector to get the available date text (it has no class or id)
+              $(metadata)
                 .find(
                   "main > div > div > div > article:nth-child(4) > div > dl > div:nth-child(1) > dd"
                 )
-                .text(),
-              furnished: $(metadata)
-                .find(
-                  "main > div > div > div > article:nth-child(4) > div > dl > div:nth-child(4) > dd"
-                )
-                .text(),
-              agent: $(metadata)
+                .text();
+
+            const furnished = $(metadata)
+              .find(
+                "main > div > div > div > article:nth-child(4) > div > dl > div:nth-child(4) > dd"
+              )
+              .text();
+
+            const agent =
+              // Estate agent
+              $(metadata)
                 .find(
                   "main > div > div > div > article:nth-child(22) > div > div > h3"
                 )
-                .text(),
+                .text();
+
+            return {
+              address,
+              type,
+              link,
+              bedrooms,
+              pricePerMonth,
+              pricePerMonthPerPerson: (pricePerMonth / bedrooms).toFixed(2),
+              pricePerWeek,
+              image,
+              availableDate,
+              furnished,
+              agent,
             };
           })
           .toArray()

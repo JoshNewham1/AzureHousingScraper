@@ -4,6 +4,7 @@ export const delay = (delayMs: number) => {
   });
 };
 
+// Format the email HTML from the properties object
 export const buildEmailHtml = (properties: object, subtitle: string) => {
   let emailHtml = `<h2>${subtitle}</h2>`;
   Object.keys(properties).forEach((key) => {
