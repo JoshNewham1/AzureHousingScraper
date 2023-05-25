@@ -47,7 +47,7 @@ export const scrapeGumtree = async (context: Context) => {
   const numPages = await page.evaluate(() => {
     const pageNumbers = document.querySelectorAll(".pagination-page");
     const lastPageNumber = pageNumbers[pageNumbers.length - 1] as HTMLLIElement;
-    return parseInt(lastPageNumber.innerText);
+    return parseInt(lastPageNumber?.innerText || "1");
   });
   context.log(`${numPages} pages found on Gumtree website`);
   let properties = {};
