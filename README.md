@@ -40,13 +40,13 @@ A housing scraper that checks Gumtree and Rightmove periodically and sends an em
    cp .env.instance.example .env.my-search
    ```
    Fill in your search details:
-   - `GUMTREE_LINK`: Your specific Gumtree search URL.
-   - `RIGHTMOVE_LINK`: Your specific Rightmove search URL.
+   - `GUMTREE_LINK`: Your specific Gumtree search URL. Use semicolons to separate multiple links.
+   - `RIGHTMOVE_LINK`: Your specific Rightmove search URL. Use semicolons to separate multiple links.
    - `RECIPIENT_EMAIL`: Where you want to receive notifications (supports semicolon-delimited addresses).
    - `START_DATE_FILTER`: (Optional) Only receive listings from this date onwards. Leave blank for all.
    - `SCHEDULE`: (Optional) Cron expression for when to run (defaults to `cron(0 9 * * ? *)` which is 9am UTC daily).
    
-   You can create multiple instance files (e.g. `.env.london-search`, `.env.manchester-search`) to run different searches simultaneously.
+   You can create multiple instance files (e.g. `.env.london-search`, `.env.manchester-search`) to run different searches simultaneously (currently only on AWS, using `deploy.sh`).
 
 3. **Run with Docker Compose**:
    ```bash

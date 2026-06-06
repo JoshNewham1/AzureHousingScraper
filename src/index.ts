@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
-dotenv.config();
+// Ignore .env files used for deployment
+dotenv.config({ path: [".env", ".env.shared"] });
 
 import * as fs from "fs-extra";
 import * as path from "path";
@@ -35,9 +36,16 @@ async function runScraper() {
     }
 
     // Open Puppeteer and scrape
-    const rightmoveProperties = await scrapeRightMove();
-    const gumtreeProperties = await scrapeGumtree();
-    const properties = { ...rightmoveProperties, ...gumtreeProperties };
+    const rightmoveUrls = (process.env["RIGHTMOVE_LINK"] || "").split(";");
+    const gumtreeUrls = (process.env["GUMTREE_LINK"] || "").split(";");
+
+    let properties: Record<string, any> = {};
+    for (const url of rightmoveUrls) {
+      Object.assign(properties, await scrapeRightMove(url));
+    }
+    for (const url of gumtreeUrls) {
+      Object.assign(properties, await scrapeGumtree(url));
+    }
     
     const propertiesDiff: any = detailedDiff(oldProperties, properties);
     console.log(`Object diff: ${JSON.stringify(propertiesDiff)}`);

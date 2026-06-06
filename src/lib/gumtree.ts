@@ -4,12 +4,7 @@ import { Property, autoScroll, delay } from "./utils";
 
 puppeteer.use(StealthPlugin());
 
-export const scrapeGumtree = async () => {
-  const startingUrl = process.env["GUMTREE_LINK"];
-  if (!startingUrl) {
-    throw new Error("GUMTREE_LINK environment variable is not set");
-  }
-
+export const scrapeGumtree = async (startingUrl: string) => {
   const browser = await puppeteer.launch({
     headless: true,
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,

@@ -2,12 +2,7 @@ import * as puppeteer from "puppeteer";
 import { autoScroll, delay, Property } from "./utils";
 import type {} from "jquery";
 
-export const scrapeRightMove = async () => {
-  const startingUrl = process.env["RIGHTMOVE_LINK"];
-  if (!startingUrl) {
-    throw new Error("RIGHTMOVE_LINK environment variable is not set");
-  }
-
+export const scrapeRightMove = async (startingUrl: string) => {
   const browser = await puppeteer.launch({
     headless: true,
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
